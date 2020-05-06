@@ -13,6 +13,38 @@ Rotary encoders are on the following ports:
   PC3 & PC2 for pan dial
   PC1 & PB5 for tilt dial
 
+Servos for panning and tilting are on the following ports:
+  PB2 (OC1A) for tilting
+  PB2 (OC1B) for panning
+
+Servo angles
+Tilt
+  Only want to go from 0 - 45 degrees
+
+  0 deg : 1.4ms duty cycle
+  1.4 ms / 8 us = 175
+
+  15 deg : 1.57ms duty cycle
+  1.56 ms / 8 us = 196
+
+  30 deg : 1.73 ms duty cycle
+  1.73 ms / 8 us = 216
+
+  45 deg : 1.9ms duty cycle
+  1.9 ms / 8 us = 237
+
+Pan
+  -90 to +90 degrees
+
+  -90 deg : 0.52ms duty cycle
+  0.52 ms / 8 us = 65
+
+  -45 deg : 0.96ms duty cycle
+  0.96 ms / 8 us = 120
+
+  90 deg : 2.4ms duty cycle
+  2.4 ms / 8 us = 300
+
 */
 
 volatile bool speedChanged = false;
@@ -24,6 +56,22 @@ volatile unsigned char prevSpeed1, prevSpeed2, prevPan1, prevPan2, prevTilt1, pr
 volatile int speedCount = 0;
 volatile int panCount = 0;
 volatile int tiltCount = 0;
+
+int init_pwm(void) {
+	// Fast PWM 
+	// FOSC = 7372800 Hz
+	// Prescalar = 64
+	// Fpwm = FOSC / Prescalar * (1 + ICR1)
+	// ICR1 is top value to count to
+	// We want Fpwm = 50 Hz, so ICR1 = 2303
+	// Frequency of clock is FOSC/prescalar = 115200Hz
+	// Period is 1/115200 = (approx) 8 us
+	ICR1 = 2303
+	OCR1A = 196;  // 15 degrees
+	OCR1B = 175;  // pointing forward 0 degrees
+	TCCR1A |= (1 << WGM11 | 1 << COM1A1 | 1 << COM1B1);
+	TCCR1B |= (1 << WGM13 | 1 << WGM12 | 1 << CS11 | 1 << CS10); 
+}
 
 int init_encoder(void) {
 
@@ -118,7 +166,3 @@ ISR(PCINT1_vect){
 		prevPan2 = pan2;
 	}
 }
-
-
-
-

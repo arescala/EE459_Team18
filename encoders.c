@@ -20,30 +20,11 @@ Servos for panning and tilting are on the following ports:
 Servo angles
 Tilt
   Only want to go from 15 - 45 degrees
-
-  15 deg : 1.57ms duty cycle
-  1.56 ms / 8 us = 196
-
-  30 deg : 1.73 ms duty cycle
-  1.73 ms / 8 us = 216
-
-  45 deg : 1.9ms duty cycle
-  1.9 ms / 8 us = 237
+  198 - 218 cycles
 
 Pan
   -90 to +90 degrees
-
-  -90 deg : 0.52ms duty cycle
-  0.52 ms / 8 us = 65
-
-  -45 deg : 0.96ms duty cycle
-  0.96 ms / 8 us = 120
-
-  0 deg : 1.4ms duty cycle
-  1.4 ms / 8 us = 175
-
-  90 deg : 2.4ms duty cycle
-  2.4 ms / 8 us = 300
+  125 - 250 cycles
 
 */
 
@@ -67,8 +48,8 @@ int init_pwm(void) {
 	// Frequency of clock is FOSC/prescalar = 115200Hz
 	// Period is 1/115200 = (approx) 8 us
 	ICR1 = 2303;
-	OCR1A = 196;  // 15 degrees tilt
-	OCR1B = 175;  // pointing forward 0 degrees (pan)
+	OCR1A = 198;  // 15 degrees tilt
+	OCR1B = 187;  // 0 degrees pan
 	TCCR1A |= (1 << WGM11 | 1 << COM1A1 | 1 << COM1B1);
 	TCCR1B |= (1 << WGM13 | 1 << WGM12 | 1 << CS11 | 1 << CS10); 
 }
@@ -127,8 +108,8 @@ ISR(PCINT0_vect){
 	if (prevTilt1 != tilt1){
 		//tiltChanged = true;
 		tiltCount++;
-		if(tiltCount > 237){
-			tiltCount = 237;
+		if(tiltCount > 218){
+			tiltCount = 218;
 		}
 		prevTilt1 = tilt1;
 		OCR1A = tiltCount;
@@ -147,8 +128,8 @@ ISR(PCINT1_vect){
 	if(prevTilt2 != tilt2){
 		//tiltChanged = true;
 		tiltCount--;
-		if(tiltCount < 196){	// cap at 196
-			tiltCount = 196;
+		if(tiltCount < 198){	// cap at 196
+			tiltCount = 198;
 		}
 		prevTilt2 = tilt2;
 		OCR1A = tiltCount;
@@ -166,8 +147,8 @@ ISR(PCINT1_vect){
 	if(prevPan1 != pan1){
 		//panChanged = true;
 		panCount++;
-		if(panCount > 300){
-			panCount = 300;
+		if(panCount > 250){
+			panCount = 250;
 		}
 		prevPan1 = pan1;
 		OCR1B = panCount;
@@ -175,8 +156,8 @@ ISR(PCINT1_vect){
 	if(prevPan2 != pan2){
 		//panChanged = true;
 		panCount--;
-		if(panCount < 65){
-			panCount = 65;
+		if(panCount < 125){
+			panCount = 125;
 		}
 		prevPan2 = pan2;
 		OCR1B = panCount;

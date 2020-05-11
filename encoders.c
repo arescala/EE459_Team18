@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <avr/interrupt.h>
 #include <stdbool.h>
+#include "encoders.h"
 
 /*
 
@@ -14,7 +15,7 @@ Rotary encoders are on the following ports:
   PC1 & PB5 for tilt dial
 
 Servos for panning and tilting are on the following ports:
-  PB2 (OC1A) for tilting
+  PB1 (OC1A) for tilting
   PB2 (OC1B) for panning
 
 Servo angles
@@ -61,6 +62,9 @@ int init_encoder(void) {
 	PORTC |= (1 << PC3 | 1 << PC2);
 	PORTC |= (1 << PC1);
 	PORTB |= (1 << PB5);
+
+	// Set output pins
+	DDRB |= (1 << PB1 | 1 << PB2);
 
 	// Initialize values
 	portBbits = PINB;

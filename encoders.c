@@ -29,17 +29,13 @@ Pan
 
 */
 
-//volatile bool speedChanged = false;
-//volatile bool panChanged = false;
-//volatile bool tiltChanged = false;
-
 volatile unsigned char portBbits, portCbits, speed1, speed2, pan1, pan2, tilt1, tilt2;
 volatile unsigned char prevSpeed1, prevSpeed2, prevPan1, prevPan2, prevTilt1, prevTilt2;
 volatile int speedCount = 0;
 volatile int panCount = 0;
 volatile int tiltCount = 0;
 
-int init_pwm(void) {
+void init_pwm(void) {
 	// Fast PWM 
 	// FOSC = 7372800 Hz
 	// Prescalar = 64
@@ -55,7 +51,7 @@ int init_pwm(void) {
 	TCCR1B |= (1 << WGM13 | 1 << WGM12 | 1 << CS11 | 1 << CS10); 
 }
 
-int init_encoder(void) {
+void init_encoder(void) {
 
 	// Enable pull up resistors on all pins
 	PORTC |= (1 << PC5 | 1 << PC4);
@@ -91,18 +87,6 @@ int init_encoder(void) {
 	PCMSK1 |= (1 << PC5 | 1 << PC4 | 1 << PC3 | 1 << PC2 | 1 << PC1);
 
 	sei();
-
-	while(1){
-		/*if(tiltChanged){
-			tiltChanged = false;
-		}
-		if(panChanged){
-			panChanged = false;
-		}
-		if(speedChanged){
-			speedChanged = false;
-		}*/
-	}
 }
 
 // ISR for PORTB (half of the tilt dial)
@@ -110,7 +94,6 @@ ISR(PCINT0_vect){
 	portBbits = PINB;
 	tilt1 = portBbits & (1 << PB5);
 	if (prevTilt1 != tilt1){
-		//tiltChanged = true;
 		tiltCount++;
 		if(tiltCount > 218){
 			tiltCount = 218;
@@ -130,7 +113,6 @@ ISR(PCINT1_vect){
 	pan2 = portCbits & (1 << PC2);
 
 	if(prevTilt2 != tilt2){
-		//tiltChanged = true;
 		tiltCount--;
 		if(tiltCount < 198){	// cap at 196
 			tiltCount = 198;
@@ -139,17 +121,14 @@ ISR(PCINT1_vect){
 		OCR1A = tiltCount;
 	}
 	if(prevSpeed1 != speed1){
-		//speedChanged = true;
 		speedCount++;
 		prevSpeed1 = speed1;
 	}
 	if(prevSpeed2 != speed2){
-		//speedChanged = true;
 		speedCount--;
 		prevSpeed2 = speed2;
 	}
 	if(prevPan1 != pan1){
-		//panChanged = true;
 		panCount++;
 		if(panCount > 250){
 			panCount = 250;
@@ -158,7 +137,6 @@ ISR(PCINT1_vect){
 		OCR1B = panCount;
 	}
 	if(prevPan2 != pan2){
-		//panChanged = true;
 		panCount--;
 		if(panCount < 125){
 			panCount = 125;

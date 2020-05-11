@@ -28,7 +28,9 @@ int main(void){
 	init_pwm();
 	init_encoder();
 
-	unsigned int state = 0;
+	unsigned int state = ON_INIT_STATE;
+
+	
 	
 	return state;
 }

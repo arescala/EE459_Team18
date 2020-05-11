@@ -19,10 +19,7 @@ Servos for panning and tilting are on the following ports:
 
 Servo angles
 Tilt
-  Only want to go from 0 - 45 degrees
-
-  0 deg : 1.4ms duty cycle
-  1.4 ms / 8 us = 175
+  Only want to go from 15 - 45 degrees
 
   15 deg : 1.57ms duty cycle
   1.56 ms / 8 us = 196
@@ -42,14 +39,17 @@ Pan
   -45 deg : 0.96ms duty cycle
   0.96 ms / 8 us = 120
 
+  0 deg : 1.4ms duty cycle
+  1.4 ms / 8 us = 175
+
   90 deg : 2.4ms duty cycle
   2.4 ms / 8 us = 300
 
 */
 
-volatile bool speedChanged = false;
-volatile bool panChanged = false;
-volatile bool tiltChanged = false;
+//volatile bool speedChanged = false;
+//volatile bool panChanged = false;
+//volatile bool tiltChanged = false;
 
 volatile unsigned char portBbits, portCbits, speed1, speed2, pan1, pan2, tilt1, tilt2;
 volatile unsigned char prevSpeed1, prevSpeed2, prevPan1, prevPan2, prevTilt1, prevTilt2;
@@ -66,9 +66,9 @@ int init_pwm(void) {
 	// We want Fpwm = 50 Hz, so ICR1 = 2303
 	// Frequency of clock is FOSC/prescalar = 115200Hz
 	// Period is 1/115200 = (approx) 8 us
-	ICR1 = 2303
-	OCR1A = 196;  // 15 degrees
-	OCR1B = 175;  // pointing forward 0 degrees
+	ICR1 = 2303;
+	OCR1A = 196;  // 15 degrees tilt
+	OCR1B = 175;  // pointing forward 0 degrees (pan)
 	TCCR1A |= (1 << WGM11 | 1 << COM1A1 | 1 << COM1B1);
 	TCCR1B |= (1 << WGM13 | 1 << WGM12 | 1 << CS11 | 1 << CS10); 
 }
@@ -108,7 +108,7 @@ int init_encoder(void) {
 	sei();
 
 	while(1){
-		if(tiltChanged){
+		/*if(tiltChanged){
 			tiltChanged = false;
 		}
 		if(panChanged){
@@ -116,7 +116,7 @@ int init_encoder(void) {
 		}
 		if(speedChanged){
 			speedChanged = false;
-		}
+		}*/
 	}
 }
 
@@ -125,9 +125,13 @@ ISR(PCINT0_vect){
 	portBbits = PINB;
 	tilt1 = portBbits & (1 << PB5);
 	if (prevTilt1 != tilt1){
-		tiltChanged = true;
+		//tiltChanged = true;
 		tiltCount++;
+		if(tiltCount > 237){
+			tiltCount = 237;
+		}
 		prevTilt1 = tilt1;
+		OCR1A = tiltCount;
 	}
 }
 
@@ -141,28 +145,40 @@ ISR(PCINT1_vect){
 	pan2 = portCbits & (1 << PC2);
 
 	if(prevTilt2 != tilt2){
-		tiltChanged = true;
+		//tiltChanged = true;
 		tiltCount--;
+		if(tiltCount < 196){	// cap at 196
+			tiltCount = 196;
+		}
 		prevTilt2 = tilt2;
+		OCR1A = tiltCount;
 	}
 	if(prevSpeed1 != speed1){
-		speedChanged = true;
+		//speedChanged = true;
 		speedCount++;
 		prevSpeed1 = speed1;
 	}
 	if(prevSpeed2 != speed2){
-		speedChanged = true;
+		//speedChanged = true;
 		speedCount--;
 		prevSpeed2 = speed2;
 	}
 	if(prevPan1 != pan1){
-		panChanged = true;
+		//panChanged = true;
 		panCount++;
+		if(panCount > 300){
+			panCount = 300;
+		}
 		prevPan1 = pan1;
+		OCR1B = panCount;
 	}
 	if(prevPan2 != pan2){
-		panChanged = true;
+		//panChanged = true;
 		panCount--;
+		if(panCount < 65){
+			panCount = 65;
+		}
 		prevPan2 = pan2;
+		OCR1B = panCount;
 	}
 }

@@ -11,6 +11,7 @@
 
 // Output pins
 #define BUZZER_PIN PD3
+#define ALERT_LED_PIN PD4
 
 // State machine
 #define ON_INIT_STATE 0
@@ -37,7 +38,7 @@ int main(void){
 
 	// Set output pins
 	DDRD |= (1 << BUZZER_PIN);
-
+	DDRD |= (1 << ALERT_LED_PIN);
 
 	init_encoders_motors();
 	init_launcher_pwm();
@@ -105,18 +106,21 @@ int main(void){
 			}
 		}
 		else if(state == ON_LAUNCH_STATE){
+			PORTD |= (1 << BUZZER_PIN);
+			_delay_ms(3401);	// delay to create buzzer frequency
+			PORTD &= ~(1 << BUZZER_PIN);
 
 			turn_on_launcher();
 			_delay_ms(5000);
 			turn_off_launcher();
 
-			// Set motor speed from idle to user setting
-			// wait 3 seconds, buzz/alert, then release ball
-
 			state = ON_IDLE_STATE;
 		}
 		else if(state == ON_CONTROL_FROM_REMOTE_STATE){
-			if(!rc_connected){
+			if(battery_voltage < BATTERY_LOW_THRESHOLD){
+				state = LOW_POWER_ERROR_STATE;
+			}
+			else if(!rc_connected){
 				state = ON_IDLE_STATE;
 			}
 			else if(setting_launch && ball_detected){
@@ -124,13 +128,23 @@ int main(void){
 			}
 		}
 		else if(state == ON_MANUAL_LAUNCH_STATE){
+			PORTD |= (1 << BUZZER_PIN);
+			_delay_ms(3401);	// delay to create buzzer frequency
+			PORTD &= ~(1 << BUZZER_PIN);
+
 			turn_on_launcher();
 			_delay_ms(5000);
 			turn_off_launcher();
 			state = ON_CONTROL_FROM_REMOTE_STATE;
 		}
 		else if(state == LOW_POWER_ERROR_STATE){
+			PORTD |= (1 << BUZZER_PIN);
+			_delay_ms(2146);	// delay to create buzzer frequency, different from launch sound
+			PORTD &= ~(1 << BUZZER_PIN);	// turn LED on
+
+			PORTD |= (1 << ALERT_LED_PIN);
 			if(battery_voltage > BATTERY_GOOD_THRESHOLD){
+				PORTD &= ~(1 << ALERT_LED_PIN);	// turn LED off
 				state = ON_IDLE_STATE;
 			}
 		}

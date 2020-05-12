@@ -27,12 +27,14 @@ extern volatile bool ball_detected;
 volatile unsigned char portBbits, servo_rotate;
 
 void init_detection_pwm(void) {
-    
-    ICR1 = 2303;
-    OCR1A = 250; // Have dispenser oriented on one end of release mechanism
-    TCCR1A |= (1 << WGM11 | 1 << COM1A1 | 1 << COM1B1);
-    TCCR1B |= (1 << WGM13 | 1 << WGM12 | 1 << CS11 | 1 << CS10);
-    
+    // Fast PWM
+    // FOSC = 7372800 Hz
+    // Prescalar = 64
+    // Fpwm = FOSC / Prescalar * 256
+    OCR0A = 250; // Have dispenser oriented on one end of release mechanism
+    TCCR0A |= (1 << COM0A1 | 1 << COM0A0 | 1 << WGM01 | 1 << WGM00);
+    TCCR0B |= (1 << WGM02 | 1 << CA01 | 1 << CA02);
+
 }
 
 void init_detection(void) {

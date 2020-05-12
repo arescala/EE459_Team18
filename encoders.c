@@ -9,6 +9,7 @@
 #include "led_driver.h"
 
 #define LAUNCHER_PIN PD6
+#define SWITCH_PRESSED !(PIND & (1 << PD0))
 
 /*
 
@@ -37,7 +38,7 @@ Speed
   delta 1 cycles = delta 8 for 
 
 */
-
+extern volatile bool ball_detected;
 volatile unsigned char portDbits, portBbits, portCbits, speed1, speed2, pan1, pan2, tilt1, tilt2;
 volatile unsigned char prevSpeed1, prevSpeed2, prevPan1, prevPan2, prevTilt1, prevTilt2;
 volatile int speedCount = 0;
@@ -213,4 +214,11 @@ ISR(PCINT2_vect){
 		prevSpeed2 = speed2;
 		OCR0A = speedCount;
 	}
+
+	if (SWITCH_PRESSED){
+        OCR1A = 125;    // Rotate servo 180 degrees so that ball can be dispensed into the launcher
+        ball_detected = true;   // flag to alert main.c that ball is in launcher
+        _delay_ms(5000);    // Wait 5 seconds before returning to original positon
+        OCR1A = 250;    // Servo goes to original position
+    }
 }

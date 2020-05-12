@@ -23,7 +23,14 @@ FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0xe0:m
 # Tune the lines below only if you know what you are doing:
 
 AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE)
-COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
+COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -I "VirtualWire" -I "remote"
+
+ifeq ($(OS),Windows_NT)
+    RM = del /Q /F
+else
+    RM = rm -f
+endif
+
 
 # symbolic targets:
 all:	main.hex
@@ -55,14 +62,14 @@ load: all
 	bootloadHID main.hex
 
 clean:
-	rm -f main.hex main.elf $(OBJECTS)
+	$(RM) main.hex main.elf $(OBJECTS)
 
 # file targets:
 main.elf: $(OBJECTS)
 	$(COMPILE) -o main.elf $(OBJECTS)
 
 main.hex: main.elf
-	rm -f main.hex
+	$(RM) main.hex
 	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
 	avr-size --format=avr --mcu=$(DEVICE) main.elf
 # If you have an EEPROM section, you must also create a hex file for the

@@ -12,7 +12,7 @@
 Rotary encoders are on the following ports:
   PC5 & PC4 for speed dial
   PC3 & PC2 for pan dial
-  PC1 & PB5 for tilt dial
+  PC1 & PB0 for tilt dial
 
 Servos for panning and tilting are on the following ports:
   PB1 (OC1A) for tilting
@@ -57,7 +57,7 @@ void init_encoder(void) {
 	PORTC |= (1 << PC5 | 1 << PC4);
 	PORTC |= (1 << PC3 | 1 << PC2);
 	PORTC |= (1 << PC1);
-	PORTB |= (1 << PB5);
+	PORTB |= (1 << PB0);
 
 	// Set output pins
 	DDRB |= (1 << PB1 | 1 << PB2);
@@ -76,14 +76,14 @@ void init_encoder(void) {
 	prevPan2 = pan2;
 	prevPan1 = pan1;
 	// Init tilt angle
-	tilt1 = portBbits & (1 << PB5);
+	tilt1 = portBbits & (1 << PB0);
 	tilt2 = portCbits & (1 << PC1);
 	prevTilt2 = tilt2;
 	prevTilt1 = tilt1;
 
 	// Initialize pin change interrupts for rotary encoders
 	PCICR |= (1 << PCIE0 | 1 << PCIE1); // PCIE0 is for PORTB and PCIE1 is for PORTC
-	PCMSK0 |= (1 << PB5);
+	PCMSK0 |= (1 << PB0);
 	PCMSK1 |= (1 << PC5 | 1 << PC4 | 1 << PC3 | 1 << PC2 | 1 << PC1);
 
 	sei();
@@ -92,7 +92,7 @@ void init_encoder(void) {
 // ISR for PORTB (half of the tilt dial)
 ISR(PCINT0_vect){
 	portBbits = PINB;
-	tilt1 = portBbits & (1 << PB5);
+	tilt1 = portBbits & (1 << PB0);
 	if (prevTilt1 != tilt1){
 		tiltCount++;
 		if(tiltCount > 218){

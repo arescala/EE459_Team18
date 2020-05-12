@@ -4,7 +4,9 @@
 #include "encoders.h"
 #include "ball_detection.h"
 #include "safety_sensor.h"
-#include "rc_message.h"
+#include "remote/rc_message.h"
+#include "receiver.h"
+#include "battery_monitor.h"
 
 // Output pins
 #define LAUNCHER_MOTOR_PIN PD2
@@ -21,6 +23,15 @@
 
 volatile bool ball_detected = false;
 volatile int safety_sensor_flag = false;
+volatile uint8_t time_since_rx = 0;
+
+uint8_t battery_voltage = 0;
+
+uint8_t rc_connected = 0;
+uint8_t setting_tilt = 0;
+uint8_t setting_pan = 0;
+uint8_t setting_speed = 0;
+uint8_t setting_launch = 0;
 
 int main(void){
 
@@ -30,23 +41,49 @@ int main(void){
 
 	init_pwm();
 	init_encoder();
+	rx_setup();
 
 	unsigned int state = ON_INIT_STATE;
 
+	struct RCMessage message;
+
 	while (1){
 
-		//not sure where this goes but
-		//if rx message, switch states
 		//check for message every loop
+		if (rc_recv(&message))
+		{
+			setting_tilt = message.tilt;
+			setting_pan = message.pan;
+			setting_speed = message.speed;
+			setting_launch = message.launch;
+			//reset timeout counter
+			rc_connected = 1;
+			time_since_rx = 0;
+		}
+		else
+		{
+			//no message received, check timeout
+			//if timed out, set rc_connected to 0
+			if (time_since_rx >= RC_TIMEOUT_THRESHOLD)
+			{
+				rc_connected = 0;
+			}
+
+		}
+
+		//check battery voltage
+		battery_voltage	= get_battery_voltage();
+
+		//state machine
 
 		if(state == ON_INIT_STATE){
 			state = ON_IDLE_STATE;
 		}
 		else if(state == ON_IDLE_STATE){
-			if(/* battery below 14V */){
+			if(battery_voltage < BATTERY_LOW_THRESHOLD){
 				state = LOW_POWER_ERROR_STATE;
 			}
-			else if(/* remote controller on */){
+			else if(rc_connected){
 				state = ON_CONTROL_FROM_REMOTE_STATE;
 			}
 			else if(ball_detected){
@@ -65,13 +102,15 @@ int main(void){
 		}
 		else if(state == ON_LAUNCH_STATE){
 			// TODO: Launch?
+			// Set motor speed from idle to user setting
+			// wait 3 seconds, buzz/alert, then release ball
 			state = ON_IDLE_STATE;
 		}
 		else if(state == ON_CONTROL_FROM_REMOTE_STATE){
-			if(/* remote controller off */){
+			if(!rc_connected){
 				state = ON_IDLE_STATE;
 			}
-			else if(/* launch button pressed && */ ball_detected){
+			else if(setting_launch && ball_detected){
 				state = ON_MANUAL_LAUNCH_STATE;
 			}
 		}
@@ -80,7 +119,7 @@ int main(void){
 			state = ON_CONTROL_FROM_REMOTE_STATE;
 		}
 		else if(state == LOW_POWER_ERROR_STATE){
-			if(/* battery above 14V */){
+			if(battery_voltage > BATTERY_GOOD_THRESHOLD){
 				state = ON_IDLE_STATE;
 			}
 		}

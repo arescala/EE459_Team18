@@ -15,6 +15,6 @@ uint8_t tx_buflen;
 
 void tx_setup();
 
-void send(struct RCMessage* message);
+void rc_send(struct RCMessage* message);
 
 #endif

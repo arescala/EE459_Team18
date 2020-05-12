@@ -24,7 +24,7 @@ int main()
         message.tilt = get_tilt();
         message.launch = get_launch();
         //send as datagrams
-        send(&message);
+        rc_send(&message);
 
         //sleep for period of time
         _delay_ms(1000/SEND_FREQ);

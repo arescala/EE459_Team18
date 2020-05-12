@@ -7,7 +7,7 @@ void tx_setup()
     tx_buflen = sizeof(tx_buf);
 }
 
-void send(struct RCMessage* message)
+void rc_send(struct RCMessage* message)
 {
     rc_message_to_byte_array(message, tx_buf);
     vw_send(tx_buf, tx_buflen);

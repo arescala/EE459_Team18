@@ -1,6 +1,8 @@
 #ifndef RECEIVER_H
 #define RECEIVER_H
 
+#include <avr/interrupt.h>
+
 #include "VirtualWire/VirtualWire_Config.h"
 #include "VirtualWire/VirtualWire.h"
 #include "remote/rc_message.h"
@@ -9,7 +11,7 @@
 #define RC_TIMEOUT_THRESHOLD 0xf8
 
 //input pins
-#define RF_PIN      PD6
+#define RF_PIN      PD1
 
 uint8_t rx_buf[RC_MESSAGE_LEN];
 uint8_t rx_buflen;

@@ -9,7 +9,7 @@ void rx_setup()
     TCCR2A |= (1 << WGM21); //CTC
     TIMSK2 |= (1 << OCIE2A); //enable interrupts
     OCR2A = 0xff; //compare against 255
-    TCCR2B |= (1 << CS2) | (1 << CS0); //1024 prescaler
+    TCCR2B |= (1 << CS22) | (1 << CS20); //1024 prescaler
 }
 
 uint8_t rc_recv(struct RCMessage* message)
@@ -27,7 +27,7 @@ uint8_t rc_recv(struct RCMessage* message)
     }
 }
 
-ISR(TIMER2_COMPA_vect)
-{
-    time_since_rx += 1;
-}
+// ISR(TIMER2_COMPA_vect)
+// {
+//     time_since_rx += 1;
+// }

@@ -22,7 +22,7 @@
 // Define the IO pin used for receiving data
 #define VW_RX_PORT  PORTD
 #define VW_RX_DDR  DDRD
-#define VW_RX_PIN  PD6
+#define VW_RX_PIN  PD1
 
 //	Define the 16 bits timer index to be used by the library (e.g. 1)
 //	The default timer configuration will use TIMSKn as interrupt mask register,

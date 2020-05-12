@@ -42,6 +42,7 @@ int main(void){
 	init_pwm();
 	init_encoder();
 	rx_setup();
+	init_battery_monitor();
 
 	unsigned int state = ON_INIT_STATE;
 

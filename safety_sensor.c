@@ -22,12 +22,13 @@ int check_surroundings() {
     PORTD |= (1 << PING_SENSOR); // Send trigger pulse
     _delay_us(5);   // Delay 5 us as directed in datasheet
     DDRD |= (0 << PING_SENSOR); // Revert pin back to input so that we can receive data
-    TCCR0 |= (1 << WGM00); // Start timer
+    TCCR0A |= (1 << WGM00); // Start timer
     while ((PIND && PING_SENSOR) == 1) {
-        TCCR0 = 0; // Stop the timer
+        TCCR0A = 0; // Stop the timer
         if (TCNT0 <= 18500) { // If the timer value is less than or equal to the maximum sensor distance
             safety_sensor_flag = 1; // Send flag stating that there is an object within launch radius
             return safety_sensor_flag;
         }
     }
+    return -1;
 }

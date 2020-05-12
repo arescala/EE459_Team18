@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <avr/interrupt.h>
 #include <stdbool.h>
-#include "ball_detection.hpp"
+#include "ball_detection.h"
 
 #define SWITCH_PRESSED !(PIND & (1 << PD0))
 /*

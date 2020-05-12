@@ -22,6 +22,8 @@
  
  */
 
+extern volatile bool ball_detected;
+
 volatile unsigned char portBbits, servo_rotate;
 
 void init_detection_pwm(void) {
@@ -51,6 +53,7 @@ void init_detection(void) {
 ISR(PCINT2_vect){
     if (SWITCH_PRESSED){
         OCR1A = 125;    // Rotate servo 180 degrees so that ball can be dispensed into the launcher
+        ball_detected = true;   // flag to alert main.c that ball is in launcher
         _delay_ms(5000);    // Wait 5 seconds before returning to original positon
         OCR1A = 250;    // Servo goes to original position
         }

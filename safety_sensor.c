@@ -15,7 +15,7 @@
 
  */
 
-volatile int sensor_flag = 0;
+extern volatile int safety_sensor_flag = 0;
 
 int check_surroundings() {
     DDRD |= (1 << PING_SENSOR); // Set sensor pin to output to send out pulse
@@ -26,8 +26,8 @@ int check_surroundings() {
     while ((PIND && PING_SENSOR) == 1) {
         TCCR0 = 0; // Stop the timer
         if (TCNT0 <= 18500) { // If the timer value is less than or equal to the maximum sensor distance
-            sensor_flag = 1; // Send flag stating that there is an object within launch radius
-            return sensor_flag;
+            safety_sensor_flag = 1; // Send flag stating that there is an object within launch radius
+            return safety_sensor_flag;
         }
     }
 }

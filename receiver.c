@@ -10,6 +10,7 @@ void rx_setup()
     TIMSK2 |= (1 << OCIE2A); //enable interrupts
     OCR2A = 0xff; //compare against 255
     TCCR2B |= (1 << CS22) | (1 << CS20); //1024 prescaler
+
 }
 
 uint8_t rc_recv(struct RCMessage* message)

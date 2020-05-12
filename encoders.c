@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include "encoders.h"
 
+#define LAUNCHER_PIN PD6
+
 /*
 
 Rotary encoders are on the following ports:
@@ -35,7 +37,32 @@ volatile int speedCount = 0;
 volatile int panCount = 0;
 volatile int tiltCount = 0;
 
-void init_pwm(void) {
+void init_launcher_pwm(void) {
+	// Fast PWM 
+	// FOSC = 7372800 Hz
+	// Prescalar = 256
+	// Fpwm = FOSC / Prescalar * 256
+	// Fpwm = 112.5 Hz
+	// Frequency of clock is FOSC/prescalar = 28800Hz
+	// Period is 1/28800 = (approx) 0.00003472s
+
+	// For range of speeds the OCR0A value should go from
+	// 1ms/0.00003472s = 28 
+	// to
+	// 2ms/0/00003472s = 57
+	TCCR0A |= (1 << COM0A1 | 1 << WGM01 | 1 << WGM00);
+	OCR0A = 43; // Set to 50% duty cycle or 1.5ms
+}
+
+void turn_on_launcher(void){
+	TCCR0B |= (1 << CS02);
+}
+
+void turn_off_launcher(void){
+	TCCR0B &= ~(1 << CS02);
+}
+
+void init_angle_pwm(void) {
 	// Fast PWM 
 	// FOSC = 7372800 Hz
 	// Prescalar = 64
@@ -51,7 +78,7 @@ void init_pwm(void) {
 	TCCR1B |= (1 << WGM13 | 1 << WGM12 | 1 << CS11 | 1 << CS10); 
 }
 
-void init_encoder(void) {
+void init_encoders_motors(void) {
 
 	// Enable pull up resistors on all pins
 	PORTC |= (1 << PC5 | 1 << PC4);
@@ -61,6 +88,7 @@ void init_encoder(void) {
 
 	// Set output pins
 	DDRB |= (1 << PB1 | 1 << PB2);
+	DDRD |= (1 << LAUNCHER_PIN);
 
 	// Initialize values
 	portBbits = PINB;
@@ -122,11 +150,19 @@ ISR(PCINT1_vect){
 	}
 	if(prevSpeed1 != speed1){
 		speedCount++;
+		if(speedCount > 14){
+			speedCount = 14;
+		}
 		prevSpeed1 = speed1;
+		OCR0A = speedCount;
 	}
 	if(prevSpeed2 != speed2){
 		speedCount--;
+		if(speedCount < 7){
+			speedCount = 7;
+		}
 		prevSpeed2 = speed2;
+		OCR0A = speedCount;
 	}
 	if(prevPan1 != pan1){
 		panCount++;

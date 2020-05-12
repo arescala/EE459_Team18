@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <stdio.h>
+#include <util/delay.h>
 #include <stdbool.h>
 #include "encoders.h"
 #include "ball_detection.h"
@@ -9,7 +10,6 @@
 #include "battery_monitor.h"
 
 // Output pins
-#define LAUNCHER_MOTOR_PIN PD2
 #define BUZZER_PIN PD3
 
 // State machine
@@ -36,11 +36,14 @@ uint8_t setting_launch = 0;
 int main(void){
 
 	// Set output pins
-	DDRD |= (1 << LAUNCHER_MOTOR_PIN);
 	DDRD |= (1 << BUZZER_PIN);
 
-	init_pwm();
-	init_encoder();
+
+	init_encoders_motors();
+	init_launcher_pwm();
+	init_angle_pwm();
+	turn_off_launcher();
+
 	rx_setup();
 	init_battery_monitor();
 
@@ -102,9 +105,14 @@ int main(void){
 			}
 		}
 		else if(state == ON_LAUNCH_STATE){
-			// TODO: Launch?
+
+			turn_on_launcher();
+			_delay_ms(5000);
+			turn_off_launcher();
+
 			// Set motor speed from idle to user setting
 			// wait 3 seconds, buzz/alert, then release ball
+
 			state = ON_IDLE_STATE;
 		}
 		else if(state == ON_CONTROL_FROM_REMOTE_STATE){
@@ -116,7 +124,9 @@ int main(void){
 			}
 		}
 		else if(state == ON_MANUAL_LAUNCH_STATE){
-			// TODO: Launch?
+			turn_on_launcher();
+			_delay_ms(5000);
+			turn_off_launcher();
 			state = ON_CONTROL_FROM_REMOTE_STATE;
 		}
 		else if(state == LOW_POWER_ERROR_STATE){

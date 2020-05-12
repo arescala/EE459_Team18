@@ -1,6 +1,8 @@
 #include <avr/io.h>
 #include <stdio.h>
 #include "encoders.h"
+#include "ball_detection.h"
+#include "safety_sensor.h"
 
 // Output pins
 #define LAUNCHER_MOTOR_PIN PD2

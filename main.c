@@ -4,6 +4,7 @@
 #include "encoders.h"
 #include "ball_detection.h"
 #include "safety_sensor.h"
+#include "rc_message.h"
 
 // Output pins
 #define LAUNCHER_MOTOR_PIN PD2
@@ -33,6 +34,11 @@ int main(void){
 	unsigned int state = ON_INIT_STATE;
 
 	while (1){
+
+		//not sure where this goes but
+		//if rx message, switch states
+		//check for message every loop
+
 		if(state == ON_INIT_STATE){
 			state = ON_IDLE_STATE;
 		}
@@ -80,5 +86,7 @@ int main(void){
 		}
 	}
 	
+
+
 	return state;	// never reached
 }

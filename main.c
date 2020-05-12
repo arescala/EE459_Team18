@@ -8,7 +8,7 @@
 #include "remote/rc_message.h"
 #include "receiver.h"
 #include "battery_monitor.h"
-#include "PCA9685/PCA9685_driver.h"
+#include "led_driver.h"
 
 // Output pins
 #define BUZZER_PIN PD3
@@ -44,6 +44,7 @@ int main(void){
 	init_encoders_motors();
 	init_launcher_pwm();
 	init_angle_pwm();
+	init_led_driver();
 	turn_off_launcher();
 
 	rx_setup();

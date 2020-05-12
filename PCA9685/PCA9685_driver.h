@@ -54,7 +54,7 @@
 #define PCA9685_PRESCALE_MIN 3   /**< minimum prescale value */
 #define PCA9685_PRESCALE_MAX 255 /**< maximum prescale value */
 
-uint32_t PCA9685_oscillator_frequency = FREQUENCY_OSCILLATOR;
+uint32_t PCA9685_oscillator_frequency;
 
 void PCA9685_init();
 void PCA9685_reset();

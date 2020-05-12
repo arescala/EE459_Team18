@@ -6,6 +6,8 @@ void PCA9685_init()
     PCA9685_reset();
     //set default frequency
     setPWMFreq(1000);
+    //set default internal osc frequency
+    PCA9685_oscillator_frequency = FREQUENCY_OSCILLATOR;
 }
 
 void PCA9685_reset()

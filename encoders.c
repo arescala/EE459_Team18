@@ -6,6 +6,7 @@
 #include <avr/interrupt.h>
 #include <stdbool.h>
 #include "encoders.h"
+#include "led_driver.h"
 
 #define LAUNCHER_PIN PD6
 
@@ -23,11 +24,17 @@ Servos for panning and tilting are on the following ports:
 Servo angles
 Tilt
   Only want to go from 15 - 45 degrees
-  198 - 218 cycles
+  198 - 218 cycles (delta 20)
+  delta 1 cycles = delta 12 for indicator
 
 Pan
   -90 to +90 degrees
   125 - 250 cycles
+
+Speed
+  0% to 100% rpm
+  28 - 57 cycles
+  delta 1 cycles = delta 8 for 
 
 */
 
@@ -36,6 +43,7 @@ volatile unsigned char prevSpeed1, prevSpeed2, prevPan1, prevPan2, prevTilt1, pr
 volatile int speedCount = 0;
 volatile int panCount = 0;
 volatile int tiltCount = 0;
+volatile uint8_t speed_indicator, pan_indicator, tilt_indicator;
 
 void init_launcher_pwm(void) {
 	// Fast PWM 
@@ -52,6 +60,8 @@ void init_launcher_pwm(void) {
 	// 2ms/0/00003472s = 57
 	TCCR0A |= (1 << COM0A1 | 1 << WGM01 | 1 << WGM00);
 	OCR0A = 43; // Set to 50% duty cycle or 1.5ms
+	speed_indicator = 112; // (57-43) * 8
+	set_speed_indicator(speed_indicator);
 }
 
 void turn_on_launcher(void){
@@ -74,6 +84,10 @@ void init_angle_pwm(void) {
 	ICR1 = 2303;
 	OCR1A = 198;  // 15 degrees tilt
 	OCR1B = 187;  // 0 degrees pan
+
+	tilt_indicator = 0; // lowest tilt
+	set_tilt_indicator(tilt_indicator);
+
 	TCCR1A |= (1 << WGM11 | 1 << COM1A1 | 1 << COM1B1);
 	TCCR1B |= (1 << WGM13 | 1 << WGM12 | 1 << CS11 | 1 << CS10); 
 }
@@ -126,17 +140,24 @@ ISR(PCINT0_vect){
 	speed1 = portBbits & (1 << PB7);
 	if (prevTilt1 != tilt1){
 		tiltCount++;
+		tilt_indicator += 12;
 		if(tiltCount > 218){
 			tiltCount = 218;
+			tilt_indicator -= 12;
 		}
+		set_tilt_indicator(tilt_indicator);
 		prevTilt1 = tilt1;
 		OCR1A = tiltCount;
 	}
+
 	if(prevSpeed1 != speed1){
 		speedCount++;
+		speed_indicator += 8;
 		if(speedCount > 14){
 			speedCount = 14;
+			speed_indicator -= 8;
 		}
+		set_speed_indicator(speed_indicator);
 		prevSpeed1 = speed1;
 		OCR0A = speedCount;
 	}
@@ -151,9 +172,12 @@ ISR(PCINT1_vect){
 
 	if(prevTilt2 != tilt2){
 		tiltCount--;
+		tilt_indicator -= 12;
 		if(tiltCount < 198){	// cap at 196
 			tiltCount = 198;
+			tilt_indicator += 12;
 		}
+		set_tilt_indicator(tilt_indicator);
 		prevTilt2 = tilt2;
 		OCR1A = tiltCount;
 	}
@@ -180,9 +204,12 @@ ISR(PCINT2_vect){
 	speed2 = portDbits & (1 << PD5);
 	if(prevSpeed2 != speed2){
 		speedCount--;
+		speed_indicator -= 8;
 		if(speedCount < 7){
 			speedCount = 7;
+			speed_indicator += 8;
 		}
+		set_speed_indicator(speed_indicator);
 		prevSpeed2 = speed2;
 		OCR0A = speedCount;
 	}

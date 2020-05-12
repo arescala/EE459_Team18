@@ -7,6 +7,7 @@
 #include "safety_sensor.h"
 #include "remote/rc_message.h"
 #include "receiver.h"
+#include "led_driver.h"
 #include "battery_monitor.h"
 #include "PCA9685/PCA9685_driver.h"
 
@@ -24,7 +25,7 @@
 #define LOW_POWER_ERROR_STATE 6
 
 volatile bool ball_detected = false;
-volatile int safety_sensor_flag = false;
+volatile int safety_sensor_flag = 0;
 volatile uint8_t time_since_rx = 0;
 
 uint8_t battery_voltage = 0;

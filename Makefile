@@ -1,7 +1,7 @@
 DEVICE     = atmega328p
 CLOCK      = 7372800
 PROGRAMMER = -c usbtiny -P usb
-OBJECTS    = main.o encoders.o VirtualWire/VirtualWire.o receiver.o battery_monitor.o remote/rc_message.o ball_detection.o safety_sensor.o
+OBJECTS    = main.o encoders.o VirtualWire/VirtualWire.o receiver.o battery_monitor.o remote/rc_message.o PCA9685/i2c.o PCA9685/PCA9685_driver.o ball_detection.o safety_sensor.o
 FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0xe0:m
 
 # Fuse Low Byte = 0xe0   Fuse High Byte = 0xd9   Fuse Extended Byte = 0xff

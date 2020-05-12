@@ -8,6 +8,7 @@
 #include "remote/rc_message.h"
 #include "receiver.h"
 #include "battery_monitor.h"
+#include "PCA9685/PCA9685_driver.h"
 
 // Output pins
 #define BUZZER_PIN PD3

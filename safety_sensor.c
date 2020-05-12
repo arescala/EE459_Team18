@@ -15,7 +15,7 @@
 
  */
 
-extern volatile int safety_sensor_flag = 0;
+extern volatile int safety_sensor_flag;
 
 int check_surroundings() {
     DDRD |= (1 << PING_SENSOR); // Set sensor pin to output to send out pulse

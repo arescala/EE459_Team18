@@ -47,7 +47,6 @@ void init_detection(void) {
     PCMSK2 |= (1 << PD0);
     PCICR |= (1 << PCIE2); // PCIE2 is for PORTD
     
-    sleep_enable();
     sei();
 }
 
